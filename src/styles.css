@@ -1,0 +1,676 @@
+/* =========================================================
+   prelude-intro · 开场加载 / 滚动入场 / 路由过渡
+   ========================================================= */
+
+:root {
+  --prelude-bg: #0a0c12;
+  --prelude-fg: #f4f6ff;
+  --prelude-muted: rgba(244, 246, 255, 0.64);
+  --prelude-accent: #7c8cff;
+  --prelude-accent-2: #b789ff;
+  --prelude-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --prelude-enter: 500ms;
+  --prelude-hold: 0ms;
+  --prelude-exit: 650ms;
+  --prelude-z: 9999;
+  --prelude-media-size: 132px;
+  --prelude-progress: 0%;
+  --prelude-radius: 16px;
+  --prelude-font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+}
+
+/* ---------- 声明式配置元素 ---------- */
+
+[data-prelude].prelude-config {
+  display: none !important;
+}
+
+/* ---------- 开场遮罩 ---------- */
+
+.prelude {
+  position: fixed;
+  inset: 0;
+  z-index: var(--prelude-z);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: var(--prelude-bg);
+  color: var(--prelude-fg);
+  font-family: var(--prelude-font);
+  -webkit-font-smoothing: antialiased;
+  isolation: isolate;
+  will-change: opacity, transform;
+  transition:
+    opacity var(--prelude-exit) var(--prelude-ease),
+    transform var(--prelude-exit) var(--prelude-ease),
+    clip-path var(--prelude-exit) var(--prelude-ease);
+}
+
+.prelude,
+.prelude * {
+  box-sizing: border-box;
+}
+
+.prelude__content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  max-width: min(560px, 86vw);
+  padding: 32px;
+  text-align: center;
+  animation: prelude-content-in var(--prelude-enter) var(--prelude-ease) both;
+}
+
+.prelude__title {
+  margin: 0;
+  font-size: clamp(17px, 2.4vw, 22px);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1.35;
+}
+
+.prelude__subtitle {
+  margin: -8px 0 0;
+  color: var(--prelude-muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.prelude__progress-text {
+  margin-top: -6px;
+  color: var(--prelude-muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.08em;
+}
+
+/* ---------- 媒体层（GIF / 图片 / 视频 / 自定义 DOM） ---------- */
+
+.prelude__media {
+  display: grid;
+  place-items: center;
+  width: var(--prelude-media-size);
+  max-width: 46vw;
+}
+
+.prelude__media-item {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 42vh;
+  object-fit: contain;
+  border-radius: var(--prelude-radius);
+}
+
+/* ---------- 加载指示器 ---------- */
+
+.prelude__spinner {
+  display: block;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.16);
+  border-top-color: var(--prelude-accent);
+  animation: prelude-spin 0.9s linear infinite;
+}
+
+.prelude__dots {
+  display: inline-flex;
+  gap: 8px;
+}
+
+.prelude__dots span {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--prelude-accent);
+  animation: prelude-dot 1s var(--prelude-ease) infinite;
+}
+
+.prelude__dots span:nth-child(2) {
+  animation-delay: 0.14s;
+}
+
+.prelude__dots span:nth-child(3) {
+  animation-delay: 0.28s;
+}
+
+.prelude__bar {
+  position: relative;
+  width: min(240px, 62vw);
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+}
+
+.prelude__bar-fill {
+  display: block;
+  height: 100%;
+  width: var(--prelude-progress);
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--prelude-accent), var(--prelude-accent-2));
+  transition: width 0.35s var(--prelude-ease);
+}
+
+.prelude--indeterminate .prelude__bar-fill {
+  width: 38%;
+  animation: prelude-bar 1.15s ease-in-out infinite;
+}
+
+.prelude__pulse {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+}
+
+.prelude__pulse span {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid var(--prelude-accent);
+  opacity: 0;
+  animation: prelude-pulse 1.6s var(--prelude-ease) infinite;
+}
+
+.prelude__pulse span:nth-child(2) {
+  animation-delay: 0.5s;
+}
+
+.prelude__pulse span:nth-child(3) {
+  animation-delay: 1s;
+}
+
+/* ---------- 跳过按钮 ---------- */
+
+.prelude__skip {
+  position: absolute;
+  right: clamp(16px, 4vw, 40px);
+  bottom: clamp(16px, 4vw, 40px);
+  z-index: 3;
+  appearance: none;
+  padding: 8px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--prelude-fg);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    opacity 0.3s ease;
+}
+
+.prelude__skip:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.prelude__skip:focus-visible {
+  outline: 2px solid var(--prelude-accent);
+  outline-offset: 3px;
+}
+
+.prelude--leaving .prelude__skip {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ---------- 开场动画变体 ---------- */
+
+.prelude--fade.prelude--leaving {
+  opacity: 0;
+}
+
+.prelude--zoom.prelude--leaving {
+  opacity: 0;
+  transform: scale(1.08);
+}
+
+.prelude--slide.prelude--leaving {
+  transform: translateY(-100%);
+}
+
+.prelude--mask {
+  clip-path: circle(150% at 50% 50%);
+}
+
+.prelude--mask.prelude--leaving {
+  clip-path: circle(0% at 50% 50%);
+}
+
+.prelude--blur {
+  background: color-mix(in srgb, var(--prelude-bg) 72%, transparent);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  transition:
+    opacity var(--prelude-exit) var(--prelude-ease),
+    backdrop-filter var(--prelude-exit) var(--prelude-ease);
+}
+
+.prelude--blur.prelude--leaving {
+  opacity: 0;
+  backdrop-filter: blur(0);
+  -webkit-backdrop-filter: blur(0);
+}
+
+.prelude--curtain {
+  background: transparent;
+}
+
+.prelude--curtain::before,
+.prelude--curtain::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 1;
+  width: 50.25%;
+  background: var(--prelude-bg);
+  transition: transform var(--prelude-exit) var(--prelude-ease);
+  will-change: transform;
+}
+
+.prelude--curtain::before {
+  left: 0;
+}
+
+.prelude--curtain::after {
+  right: 0;
+}
+
+.prelude--curtain.prelude--leaving::before {
+  transform: translateX(-101%);
+}
+
+.prelude--curtain.prelude--leaving::after {
+  transform: translateX(101%);
+}
+
+.prelude--leaving .prelude__content {
+  animation: none;
+  opacity: 0;
+  transform: translateY(-10px) scale(0.99);
+  transition:
+    opacity calc(var(--prelude-exit) * 0.7) var(--prelude-ease),
+    transform calc(var(--prelude-exit) * 0.7) var(--prelude-ease);
+}
+
+.prelude--leaving {
+  pointer-events: none;
+}
+
+/* ---------- 关键帧 ---------- */
+
+@keyframes prelude-content-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes prelude-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes prelude-dot {
+  0%,
+  80%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.8);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes prelude-bar {
+  0% {
+    transform: translateX(-110%);
+  }
+  100% {
+    transform: translateX(280%);
+  }
+}
+
+@keyframes prelude-pulse {
+  0% {
+    opacity: 0.7;
+    transform: scale(0.35);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1);
+  }
+}
+
+/* ---------- 滚动入场 ---------- */
+
+.prelude-reveal [data-reveal] {
+  opacity: 0;
+  will-change: opacity, transform;
+  backface-visibility: hidden;
+  transition:
+    opacity var(--reveal-duration, 700ms) var(--reveal-ease, var(--prelude-ease))
+      var(--reveal-delay, 0ms),
+    transform var(--reveal-duration, 700ms) var(--reveal-ease, var(--prelude-ease))
+      var(--reveal-delay, 0ms),
+    filter var(--reveal-duration, 700ms) var(--reveal-ease, var(--prelude-ease))
+      var(--reveal-delay, 0ms),
+    clip-path var(--reveal-duration, 700ms) var(--reveal-ease, var(--prelude-ease))
+      var(--reveal-delay, 0ms);
+}
+
+.prelude-reveal [data-reveal="fade-up"] {
+  transform: translate3d(0, 36px, 0);
+}
+
+.prelude-reveal [data-reveal="fade-down"] {
+  transform: translate3d(0, -36px, 0);
+}
+
+.prelude-reveal [data-reveal="fade-left"] {
+  transform: translate3d(-36px, 0, 0);
+}
+
+.prelude-reveal [data-reveal="fade-right"] {
+  transform: translate3d(36px, 0, 0);
+}
+
+.prelude-reveal [data-reveal="zoom"] {
+  transform: scale(0.92);
+}
+
+.prelude-reveal [data-reveal="flip"] {
+  transform: perspective(900px) rotateX(14deg) translateY(24px);
+  transform-origin: 50% 100%;
+}
+
+.prelude-reveal [data-reveal="blur"] {
+  filter: blur(12px);
+  transform: translateY(12px);
+}
+
+.prelude-reveal [data-reveal="mask"] {
+  clip-path: inset(0 0 20% 0);
+  transform: translateY(8px);
+}
+
+.prelude-reveal [data-reveal].reveal--visible {
+  opacity: 1;
+  transform: none;
+  filter: none;
+  clip-path: inset(0);
+}
+
+/* ---------- 路由过渡（遮罩回退方案） ---------- */
+
+.prelude-rt {
+  position: fixed;
+  inset: 0;
+  z-index: var(--rt-z, var(--prelude-z));
+  pointer-events: none;
+  background: var(--prelude-bg);
+  will-change: opacity, transform, clip-path;
+  transition:
+    opacity var(--rt-duration, 500ms) var(--rt-ease, var(--prelude-ease)),
+    transform var(--rt-duration, 500ms) var(--rt-ease, var(--prelude-ease)),
+    clip-path var(--rt-duration, 500ms) var(--rt-ease, var(--prelude-ease));
+}
+
+.prelude-rt.is-active {
+  pointer-events: auto;
+}
+
+.prelude-rt.is-done {
+  transition-duration: var(--rt-enter, var(--rt-duration, 500ms));
+}
+
+.prelude-rt--fade {
+  opacity: 0;
+}
+
+.prelude-rt--fade.is-active {
+  opacity: 1;
+}
+
+.prelude-rt--fade.is-done {
+  opacity: 0;
+}
+
+.prelude-rt--slide {
+  transform: translateY(-100%);
+}
+
+.prelude-rt--slide.is-active {
+  transform: translateY(0);
+}
+
+.prelude-rt--slide.is-done {
+  transform: translateY(-100%);
+}
+
+.prelude-rt--curtain {
+  background: transparent;
+}
+
+.prelude-rt__panel {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50.25%;
+  background: var(--prelude-bg);
+  will-change: transform;
+  transition: transform var(--rt-duration, 500ms) var(--rt-ease, var(--prelude-ease));
+}
+
+.prelude-rt__panel--left {
+  left: 0;
+  transform: translateX(-101%);
+}
+
+.prelude-rt__panel--right {
+  right: 0;
+  transform: translateX(101%);
+}
+
+.prelude-rt--curtain.is-active .prelude-rt__panel--left {
+  transform: translateX(0);
+}
+
+.prelude-rt--curtain.is-active .prelude-rt__panel--right {
+  transform: translateX(0);
+}
+
+.prelude-rt--curtain.is-done .prelude-rt__panel {
+  transition-duration: var(--rt-enter, var(--rt-duration, 500ms));
+}
+
+.prelude-rt--curtain.is-done .prelude-rt__panel--left {
+  transform: translateX(-101%);
+}
+
+.prelude-rt--curtain.is-done .prelude-rt__panel--right {
+  transform: translateX(101%);
+}
+
+.prelude-rt--wipe {
+  clip-path: circle(0% at 50% 50%);
+}
+
+.prelude-rt--wipe.is-active {
+  clip-path: circle(150% at 50% 50%);
+}
+
+.prelude-rt--wipe.is-done {
+  clip-path: circle(0% at 50% 50%);
+}
+
+.prelude-rt--reduced {
+  transition-duration: 1ms !important;
+}
+
+/* ---------- 路由过渡（View Transitions API 增强） ---------- */
+
+html[data-prelude-rt]::view-transition-old(root),
+html[data-prelude-rt]::view-transition-new(root) {
+  animation-duration: var(--prelude-rt-duration, 500ms);
+  animation-timing-function: var(--prelude-ease);
+  animation-fill-mode: both;
+}
+
+html[data-prelude-rt="fade"]::view-transition-old(root) {
+  animation-name: prelude-vt-fade-out;
+}
+
+html[data-prelude-rt="fade"]::view-transition-new(root) {
+  animation-name: prelude-vt-fade-in;
+}
+
+html[data-prelude-rt="slide"]::view-transition-old(root) {
+  animation-name: prelude-vt-slide-out;
+}
+
+html[data-prelude-rt="slide"]::view-transition-new(root) {
+  animation-name: prelude-vt-slide-in;
+}
+
+html[data-prelude-rt="curtain"]::view-transition-old(root) {
+  animation-name: prelude-vt-curtain-out;
+}
+
+html[data-prelude-rt="curtain"]::view-transition-new(root) {
+  animation-name: prelude-vt-curtain-in;
+}
+
+html[data-prelude-rt="wipe"]::view-transition-old(root) {
+  animation-name: prelude-vt-wipe-out;
+}
+
+html[data-prelude-rt="wipe"]::view-transition-new(root) {
+  animation-name: prelude-vt-wipe-in;
+}
+
+@keyframes prelude-vt-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes prelude-vt-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes prelude-vt-slide-out {
+  to {
+    opacity: 0.35;
+    transform: translateY(-14%);
+  }
+}
+
+@keyframes prelude-vt-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(3%);
+  }
+}
+
+@keyframes prelude-vt-curtain-out {
+  to {
+    opacity: 0;
+    transform: scale(1.04);
+  }
+}
+
+@keyframes prelude-vt-curtain-in {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+}
+
+@keyframes prelude-vt-wipe-out {
+  to {
+    clip-path: circle(0% at 50% 50%);
+  }
+}
+
+@keyframes prelude-vt-wipe-in {
+  from {
+    clip-path: circle(0% at 50% 50%);
+  }
+}
+
+/* ---------- 响应式 ---------- */
+
+@media (max-width: 520px) {
+  :root {
+    --prelude-media-size: 104px;
+  }
+
+  .prelude__content {
+    gap: 13px;
+    padding: 24px;
+  }
+}
+
+/* ---------- 减弱动效 ---------- */
+
+.prelude--reduced {
+  transition-duration: 1ms !important;
+}
+
+.prelude--reduced .prelude__content {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .prelude,
+  .prelude--blur {
+    transition-duration: 1ms !important;
+  }
+
+  .prelude__content,
+  .prelude__spinner,
+  .prelude__dots span,
+  .prelude__pulse span,
+  .prelude--indeterminate .prelude__bar-fill {
+    animation: none !important;
+  }
+
+  .prelude-reveal [data-reveal] {
+    transform: none !important;
+    filter: none !important;
+    clip-path: none !important;
+    transition-duration: 1ms !important;
+    transition-delay: 0ms !important;
+  }
+
+  .prelude-rt,
+  .prelude-rt__panel {
+    transition-duration: 1ms !important;
+  }
+
+  html[data-prelude-rt]::view-transition-old(root),
+  html[data-prelude-rt]::view-transition-new(root) {
+    animation-duration: 1ms !important;
+  }
+}

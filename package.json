@@ -1,0 +1,52 @@
+{
+  "name": "prelude-intro",
+  "version": "0.1.0",
+  "description": "零依赖网页开场动画库：开场加载、滚动入场、路由过渡",
+  "type": "module",
+  "main": "./dist/prelude-intro.umd.cjs",
+  "module": "./dist/prelude-intro.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/prelude-intro.mjs",
+      "require": "./dist/prelude-intro.umd.cjs"
+    },
+    "./prelude.css": "./dist/prelude.css",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": [
+    "**/*.css",
+    "./dist/prelude-intro.*"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "animation",
+    "loading",
+    "intro",
+    "page-transition",
+    "scroll-reveal",
+    "gif",
+    "typescript",
+    "zero-dependency"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "jsdom": "^29.1.1",
+    "typescript": "^6.0.3",
+    "vite": "^8.3.8",
+    "vite-plugin-dts": "^5.1.2",
+    "vitest": "^5.1.0"
+  }
+}

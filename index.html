@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Prelude —— 零依赖网页开场动画库，支持开场加载、滚动入场与路由过渡。" />
+    <title>Prelude · 网页开场动画库</title>
+    <script>
+      document.documentElement.classList.add('prelude-reveal')
+    </script>
+    <link rel="stylesheet" href="/demo/demo.css" />
+  </head>
+  <body>
+    <script type="application/json" data-prelude>
+      {
+        "variant": "zoom",
+        "loader": "bar",
+        "media": { "src": "/demo/assets/loading.svg", "width": 120, "height": 120 },
+        "title": "Prelude",
+        "subtitle": "正在准备页面…",
+        "showProgressText": true,
+        "preload": ["/demo/assets/loading.svg"],
+        "minDuration": 900,
+        "maxDuration": 6000
+      }
+    </script>
+
+    <header class="site-nav">
+      <a class="brand" href="#top">
+        <span class="brand__dot"></span>
+        Prelude
+      </a>
+      <nav class="site-nav__links" aria-label="页面导航">
+        <a href="#intro">开场</a>
+        <a href="#reveal">滚动入场</a>
+        <a href="#transition">路由过渡</a>
+      </nav>
+      <a class="button button--ghost" href="https://www.npmjs.com/package/prelude-intro" target="_blank" rel="noreferrer">npm</a>
+    </header>
+
+    <main>
+      <section class="hero" id="top">
+        <div class="hero__copy">
+          <p class="eyebrow">zero dependency · typescript · 8.4kb gzip</p>
+          <h1>给网页写一段<br /><span>有仪式感的开场</span></h1>
+          <p class="lede">
+            开场加载、滚动入场、路由过渡，一套零依赖的 Web 动画原语。
+            支持 GIF、图片、视频与任意自定义 DOM，自动等待资源、进度与加载完成。
+          </p>
+          <div class="hero__actions">
+            <button class="button button--primary" id="play-intro">重播开场动画</button>
+            <a class="button" href="#reveal">查看滚动入场</a>
+          </div>
+        </div>
+
+        <div class="hero__preview" aria-hidden="true">
+          <div class="preview__bar">
+            <span></span><span></span><span></span>
+            <em>prelude-intro</em>
+          </div>
+          <div class="preview__body">
+            <div class="preview__ring">
+              <i></i>
+              <b></b>
+            </div>
+            <div class="preview__lines">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="intro">
+        <div class="section__head">
+          <p class="eyebrow">01 · Intro</p>
+          <h2>开场加载动画</h2>
+          <p>六种退场变体、四种加载指示器，媒体层可直接放入 GIF 或视频。</p>
+        </div>
+
+        <div class="panel">
+          <div class="controls">
+            <label class="field">
+              <span>退场变体</span>
+              <select id="intro-variant">
+                <option value="fade">fade · 淡出</option>
+                <option value="curtain">curtain · 幕布</option>
+                <option value="slide">slide · 上滑</option>
+                <option value="zoom" selected>zoom · 缩放</option>
+                <option value="mask">mask · 遮罩</option>
+                <option value="blur">blur · 模糊</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>加载指示器</span>
+              <select id="intro-loader">
+                <option value="spinner">spinner</option>
+                <option value="dots">dots</option>
+                <option value="bar" selected>bar</option>
+                <option value="pulse">pulse</option>
+                <option value="none">none</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>媒体层</span>
+              <select id="intro-media">
+                <option value="svg" selected>动画 SVG</option>
+                <option value="custom">自定义 HTML</option>
+                <option value="none">无</option>
+              </select>
+            </label>
+
+            <label class="field field--check">
+              <input type="checkbox" id="intro-progress" checked />
+              <span>显示进度百分比</span>
+            </label>
+          </div>
+
+          <div class="panel__actions">
+            <button class="button button--primary" id="intro-play">播放开场</button>
+            <span class="status" id="intro-status">等待播放</span>
+          </div>
+
+          <pre class="code"><code id="intro-code"></code></pre>
+        </div>
+      </section>
+
+      <section class="section" id="reveal">
+        <div class="section__head">
+          <p class="eyebrow">02 · Reveal</p>
+          <h2>滚动入场</h2>
+          <p>基于 IntersectionObserver，声明式 data 属性，支持分组错峰与九种动画。</p>
+        </div>
+
+        <div class="cards" data-reveal-group data-reveal-stagger="90">
+          <article class="card" data-reveal="fade-up">
+            <span class="card__icon">◆</span>
+            <h3>一次配置</h3>
+            <p>给元素加上 <code>data-reveal</code>，自动在进入视口时播放。</p>
+          </article>
+          <article class="card" data-reveal="fade-up">
+            <span class="card__icon">◇</span>
+            <h3>分组错峰</h3>
+            <p>容器添加 <code>data-reveal-stagger</code>，子元素依次登台。</p>
+          </article>
+          <article class="card" data-reveal="fade-up">
+            <span class="card__icon">○</span>
+            <h3>按需刷新</h3>
+            <p>动态插入内容后调用 <code>reveal.refresh()</code> 即可。</p>
+          </article>
+        </div>
+
+        <div class="reveal-row" data-reveal-group data-reveal-stagger="120">
+          <div class="reveal-chip" data-reveal="fade-left">fade-left</div>
+          <div class="reveal-chip" data-reveal="zoom">zoom</div>
+          <div class="reveal-chip" data-reveal="flip">flip</div>
+          <div class="reveal-chip" data-reveal="blur">blur</div>
+          <div class="reveal-chip" data-reveal="mask">mask</div>
+          <div class="reveal-chip" data-reveal="fade-right">fade-right</div>
+        </div>
+
+        <div class="panel__actions">
+          <button class="button" id="reveal-replay">重新播放入场</button>
+          <span class="status">减弱动效时会直接显示内容</span>
+        </div>
+      </section>
+
+      <section class="section" id="transition">
+        <div class="section__head">
+          <p class="eyebrow">03 · Transition</p>
+          <h2>路由切换过渡</h2>
+          <p>与路由库解耦，优先使用 View Transitions API，不支持时回退为全屏遮罩。</p>
+        </div>
+
+        <div class="panel">
+          <div class="tabs" role="tablist" aria-label="模拟页面">
+            <button class="tab is-active" role="tab" aria-selected="true" data-page="home">首页</button>
+            <button class="tab" role="tab" aria-selected="false" data-page="work">作品</button>
+            <button class="tab" role="tab" aria-selected="false" data-page="about">关于</button>
+          </div>
+
+          <div class="page-shell">
+            <div class="page-content" id="page-content">
+              <p class="page-content__eyebrow">Home</p>
+              <h3>把每一次跳转做成一次开场</h3>
+              <p>切换标签会执行 <code>transition.run(() => 更新页面)</code>，离场、更新、入场自动串起来。</p>
+              <div class="page-content__grid">
+                <span></span><span></span><span></span><span></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="controls">
+            <label class="field">
+              <span>过渡变体</span>
+              <select id="transition-variant">
+                <option value="fade" selected>fade</option>
+                <option value="slide">slide</option>
+                <option value="curtain">curtain</option>
+                <option value="wipe">wipe</option>
+              </select>
+            </label>
+
+            <label class="field field--check">
+              <input type="checkbox" id="transition-vt" checked />
+              <span>启用 View Transitions（支持时）</span>
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section--note">
+        <div class="note">
+          <h2>想用自己的 GIF？</h2>
+          <p>
+            把文件放到 <code>demo/assets/loading.gif</code>，然后：
+          </p>
+          <pre class="code"><code>createIntro({
+  variant: 'curtain',
+  media: { src: '/demo/assets/loading.gif', width: 160 },
+  loader: 'none',
+  minDuration: 900,
+  preload: ['/demo/assets/loading.gif'],
+})</code></pre>
+          <p class="muted">
+            也支持 WebP / APNG / SVG / PNG / JPG 与 mp4 / webm 视频，或直接传入一个
+            <code>HTMLElement</code> 完全自定义开场内容。
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>Prelude · prelude-intro</span>
+      <span>MIT License · 零依赖</span>
+    </footer>
+
+    <script type="module" src="/src/index.ts"></script>
+    <script type="module" src="/demo/demo.ts"></script>
+  </body>
+</html>
